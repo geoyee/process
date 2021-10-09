@@ -48,15 +48,15 @@ def _stretch(ima, NUMS):
 
 
 # 裁剪
-def _createGrids(img, grid_size=512):
+def _createGrids(img, grid_size=512, overlap=0, other=255):
     h, w = img.shape[:2]
     grid_row_count = ceil(h / grid_size)
     grid_col_count = ceil(w / grid_size)
-    imagesGrid = _slideOut(img, grid_row_count, grid_col_count)
+    imagesGrid = _slideOut(img, grid_row_count, grid_col_count, overlap, other)
     return imagesGrid
 
 
-def _slideOut(img, row, col, overlap=0):
+def _slideOut(img, row, col, overlap=0, other=255):
     H, W = img.shape[:2]
     shape_len = len(img.shape)
     c_size = [ceil(H / row), ceil(W / col)]
@@ -68,7 +68,7 @@ def _slideOut(img, row, col, overlap=0):
         tmp = np.zeros((h_new, w_new, img.shape[-1]), dtype="uint8")
         tmp[:img.shape[0], :img.shape[1], :] = img
     else:
-        tmp = np.zeros((h_new, w_new), dtype="uint8")
+        tmp = np.ones((h_new, w_new), dtype="uint8") * other
         tmp[:img.shape[0], :img.shape[1]] = img
     H, W = tmp.shape[:2]
     cell_h = c_size[0]
@@ -133,7 +133,7 @@ for img_name in tqdm(imgs_name):
         # break
         # -- ---- --
         imgs = _createGrids(img)
-        labs = _createGrids(lab)
+        labs = _createGrids(lab, other=other[0])
         for idx, (g_img, g_lab) in enumerate(zip(imgs, labs)):
             label_list = np.unique(g_lab)
             tmp = g_lab.copy()
